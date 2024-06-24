@@ -6,4 +6,4 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 client.once(Events.ClientReady, (client: Client) => handleReady(client));
 
-client.login(config.DISCORD_TOKEN);
+// client.login(config.DISCORD_TOKEN);
