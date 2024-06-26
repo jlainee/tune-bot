@@ -1,0 +1,15 @@
+# NODE
+node_modules/
+dist/
+.env
+nodemon.json
+
+# DOCKER
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# MISC
+.gitignore
+LICENSE
+README.md
