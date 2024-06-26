@@ -1,9 +1,11 @@
 {
   "name": "tune-bot",
   "version": "1.0.0",
-  "main": "dist/main.js",
+  "main": "dist/bot.js",
   "scripts": {
-    "dev": "nodemon"
+    "build": "tsc",
+    "dev": "nodemon",
+    "start": "node dist/bot.js"
   },
   "keywords": [],
   "author": "",
