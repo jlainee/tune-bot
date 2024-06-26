@@ -1,0 +1,6 @@
+services:
+  app:
+    build: .
+    image: tune-bot:latest
+    env_file:
+      - .env
