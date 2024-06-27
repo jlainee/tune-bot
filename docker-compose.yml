@@ -4,3 +4,4 @@ services:
     image: tune-bot:latest
     env_file:
       - .env
+    init: true
