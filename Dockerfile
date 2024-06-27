@@ -1,11 +1,15 @@
 # Build Stage
-FROM node:18 AS build
+FROM node:20.15.0-bookworm-slim AS build
+
+ENV USER=node
 
 WORKDIR /usr/src/app
 
 # Install build dependencies
 RUN apt-get update \
-    && apt-get install -y python3
+    && apt-get install -y --no-install-recommends \
+        python3 \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 
@@ -17,14 +21,16 @@ COPY . .
 RUN npm run build
 
 # Production Stage
-FROM node:18
+FROM node:20.15.0-bookworm-slim
 
-# Set working directory inside the production container
+ENV NODE_ENV production
+USER ${USER}
+
 WORKDIR /usr/src/app
 
 # Copy built files from build stage
-COPY --from=build /usr/src/app/dist ./dist
-COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY package*.json ./
+COPY --chown=${USER}:${USER} --from=build /usr/src/app/dist ./dist
+COPY --chown=${USER}:${USER} --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=${USER}:${USER} package*.json ./
 
-CMD ["npm", "start"]
+CMD ["node", "dist/bot.js"]

@@ -4,6 +4,9 @@ dist/
 .env
 nodemon.json
 
+# LOGS
+*.log
+
 # DOCKER
 Dockerfile
 docker-compose.yml
