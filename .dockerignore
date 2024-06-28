@@ -10,6 +10,7 @@ nodemon.json
 # DOCKER
 Dockerfile
 docker-compose.yml
+docker-compose.dev.yml
 .dockerignore
 
 # MISC
