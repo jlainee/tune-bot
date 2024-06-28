@@ -2,6 +2,7 @@ import { Client, Events, GatewayIntentBits } from 'discord.js';
 import { config } from "./config";
 import handleReady from "./events/ready";
 import handleSignals from "./utils/signalHandler";
+import {downloadFromYoutube} from "./utils/youtubeUtil";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
