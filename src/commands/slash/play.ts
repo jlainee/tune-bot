@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
+import { searchYoutube } from '../../utils/youtubeUtils';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +20,27 @@ module.exports = {
   ],
   async execute(interaction: ChatInputCommandInteraction) {
     const query = interaction.options.getString('query');
+    if (query === null) {
+      await interaction.reply('Please prove a valid query.');
+      return;
+    }
 
-    await interaction.reply(`Attempting to play song: ${query}`);
+    const data = await searchYoutube(query);
+
+    const user = interaction.user;
+    const songName = data.title.slice(0, 28).concat('..');
+    const duration = '03:32';
+
+    const embed = new EmbedBuilder()
+      .setColor('#1df364')
+      .setTitle('Song added to Queue! 🎵')
+      .setDescription(`[${songName}](${query}) **[${duration}]**`)
+      .setTimestamp()
+      .setFooter({
+        iconURL: user.displayAvatarURL({ size: 64 }),
+        text: `${user.tag}`,
+      });
+
+    await interaction.reply({ embeds: [embed] });
   },
 };
