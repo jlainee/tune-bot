@@ -12,9 +12,4 @@ export async function handleInteractionCreate(
   if (!command) return;
 
   await command.execute(interaction, options);
-
-  await interaction.reply({
-    content: `Command "${commandName}" executed successfully!`,
-    ephemeral: true,
-  });
 }
