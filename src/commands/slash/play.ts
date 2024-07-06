@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
-import { searchYoutube } from '../../utils/youtubeUtils';
+import { searchYoutube, formatDuration } from '../../utils/youtubeUtils';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,22 +25,37 @@ module.exports = {
       return;
     }
 
-    const data = await searchYoutube(query);
+    interaction
+      .deferReply()
+      .then(() => searchYoutube(query))
+      .then((data) => {
+        const user = interaction.user;
+        const songName = data.title.slice(0, 32).concat('..');
+        const duration = formatDuration(data.duration);
 
-    const user = interaction.user;
-    const songName = data.title.slice(0, 28).concat('..');
-    const duration = '03:32';
+        const embed = new EmbedBuilder()
+          .setColor('#1df364')
+          .setTitle('Song added to Queue! 🎵')
+          .setDescription(`[${songName}](${data.url}) **[${duration}]**`)
+          .setTimestamp()
+          .setFooter({
+            iconURL: user.displayAvatarURL({ size: 64 }),
+            text: `${user.tag}`,
+          });
 
-    const embed = new EmbedBuilder()
-      .setColor('#1df364')
-      .setTitle('Song added to Queue! 🎵')
-      .setDescription(`[${songName}](${query}) **[${duration}]**`)
-      .setTimestamp()
-      .setFooter({
-        iconURL: user.displayAvatarURL({ size: 64 }),
-        text: `${user.tag}`,
+        interaction
+          .editReply({ embeds: [embed] })
+          .catch((error) => console.error('Error editing reply:', error));
+      })
+      .catch((error) => {
+        console.error(error);
+        const embed = new EmbedBuilder()
+          .setColor('#f93207')
+          .setDescription(`${error.message} :x:`);
+
+        interaction
+          .editReply({ embeds: [embed] })
+          .catch((error) => console.error('Error editing reply:', error));
       });
-
-    await interaction.reply({ embeds: [embed] });
   },
 };

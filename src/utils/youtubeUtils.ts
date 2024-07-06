@@ -15,12 +15,12 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
   });
 
   if (!res || !res.stdout) {
-    throw new Error('No video found for the query: ' + query);
+    throw new Error('Search query failed!');
   }
 
   const data = JSON.parse(res.stdout);
   if (!data || data.length === 0) {
-    throw new Error('No video found for the query: ' + query);
+    throw new Error('No results were found!');
   }
 
   return {
@@ -56,4 +56,12 @@ export async function downloadFromYoutube(query: string): Promise<string> {
     console.error('No video url found');
   }
   */
+}
+
+export function formatDuration(seconds: number): string {
+  if (seconds > 3600) {
+    return new Date(seconds * 1000).toISOString().substring(11, 16);
+  } else {
+    return new Date(seconds * 1000).toISOString().substring(14, 19);
+  }
 }
