@@ -1,8 +1,15 @@
 services:
-  app:
-    build: .
+  tune-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    image: tune-bot-dev:latest
     container_name: tune-bot-dev
-    command: ["npm", "run", "dev"]
+    volumes:
+      - ./src:/app/src
+      - /app/node_modules
     env_file:
       - .env
-    init: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Needs to be true if running on WSL2 for hot-reloading to work

@@ -1,11 +1,10 @@
-# Build Stage
-FROM node:20.15.0-bookworm-slim AS build
+# BASE
+FROM node:20.15.0-bookworm-slim AS base
 
 ENV USER=node
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Install build dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 \
@@ -13,24 +12,34 @@ RUN apt-get update \
 
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies for build)
-RUN npm install
+RUN npm ci
 
 COPY . .
 
+# DEV
+FROM base as dev
+
+WORKDIR /app
+
+COPY --from=base /app/node_modules ./node_modules
+ENV NODE_ENV development
+CMD ["npm", "run", "dev"]
+
+# BUILD
+FROM base as build
 RUN npm run build
 
-# Production Stage
-FROM node:20.15.0-bookworm-slim
+# PROD
+FROM node:20.15.0-bookworm-slim as prod
 
 ENV NODE_ENV production
 USER ${USER}
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy built files from build stage
-COPY --chown=${USER}:${USER} --from=build /usr/src/app/dist ./dist
-COPY --chown=${USER}:${USER} --from=build /usr/src/app/node_modules ./node_modules
+COPY --chown=${USER}:${USER} --from=build /app/dist ./dist
+COPY --chown=${USER}:${USER} --from=build /app/node_modules ./node_modules
 COPY --chown=${USER}:${USER} package*.json ./
 
 CMD ["node", "dist/index.js"]
