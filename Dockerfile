@@ -33,4 +33,4 @@ COPY --chown=${USER}:${USER} --from=build /usr/src/app/dist ./dist
 COPY --chown=${USER}:${USER} --from=build /usr/src/app/node_modules ./node_modules
 COPY --chown=${USER}:${USER} package*.json ./
 
-CMD ["node", "dist/bot.js"]
+CMD ["node", "dist/index.js"]

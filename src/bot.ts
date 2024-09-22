@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import path from 'node:path';
+import { config } from './config';
 import {
   Client,
   Collection,
@@ -12,37 +13,41 @@ import {
   ApplicationCommandDataResolvable,
   ApplicationCommand,
 } from 'discord.js';
-import { config } from './config';
 import { Command, commands } from './interfaces/Command';
 import handleReady from './events/ready';
 import handleSignals from './utils/signalHandler';
 import { downloadFromYoutube } from './utils/youtubeUtils';
 import { handleInteractionCreate } from './events/interactionCreate';
 
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
-});
+export const startBot = async () => {
+  const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  });
 
-client.once(Events.ClientReady, (client: Client) => handleReady(client));
-client.on(Events.InteractionCreate, async (interaction: Interaction) => {
-  if (!interaction.isChatInputCommand()) return;
+  client.once(Events.ClientReady, (client) => {
+    handleReady(client);
+  });
 
-  try {
-    await handleInteractionCreate(interaction, commands);
-  } catch (error) {
-    console.error('Error handling interaction:', error);
-    await interaction.reply({
-      content: 'There was an error while processing your command.',
-      ephemeral: true,
-    });
-  }
-});
+  client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+    if (!interaction.isChatInputCommand()) return;
 
-client.login(config.DISCORD_TOKEN);
+    try {
+      await handleInteractionCreate(interaction, commands);
+    } catch (error) {
+      console.error('Error handling interaction:', error);
+      await interaction.reply({
+        content: 'There was an error while processing your command.',
+        ephemeral: true,
+      });
+    }
+  });
 
-handleSignals();
+  await client.login(config.DISCORD_TOKEN);
+  await registerCommands(client);
+  handleSignals();
+};
 
-export async function registerCommands(client: Client) {
+export const registerCommands = async (client: Client) => {
   const rest = new REST().setToken(config.DISCORD_TOKEN);
   const appCommands = new Array<ApplicationCommandDataResolvable>();
 
@@ -60,4 +65,4 @@ export async function registerCommands(client: Client) {
   await rest.put(Routes.applicationCommands(client.user!.id), {
     body: appCommands,
   });
-}
+};
