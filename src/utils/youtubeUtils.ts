@@ -1,5 +1,8 @@
+import path from 'path';
 import { exec } from 'youtube-dl-exec';
 import { isURL } from './utils';
+import { config } from '../config';
+import logger from './logger';
 
 export interface YoutubeData {
   id: string;
@@ -32,7 +35,6 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
   };
 }
 
-// @ts-ignore
 export async function downloadFromYoutube(query: string): Promise<string> {
   let url: string;
 
@@ -43,19 +45,26 @@ export async function downloadFromYoutube(query: string): Promise<string> {
     url = youtubeQuery.url;
   }
 
-  /*
-  const video = await exec(url, {
-    dumpSingleJson: true,
-    noWarnings: true,
-    preferFreeFormats: true,
-    youtubeSkipDashManifest: true,
-    referer: 'https://www.youtube.com',
-  });
+  const outputPath = path.join(config.DOWNLOADS_DIRECTORY, '%(title)s.%(ext)s');
 
-  if (!video || !video.url) {
-    console.error('No video url found');
+  try {
+    const result = await exec(url, {
+      output: outputPath,
+      noWarnings: true,
+      preferFreeFormats: true,
+      youtubeSkipDashManifest: true,
+      referer: 'https://www.youtube.com',
+      audioFormat: 'mp3',
+      extractAudio: true,
+      printJson: true,
+    });
+
+    const videoInfo = JSON.parse(result.stdout);
+    return videoInfo._filename;
+  } catch (error) {
+    logger.error('Error downloading video:', error);
+    throw new Error('Failed to download video.');
   }
-  */
 }
 
 export function formatDuration(seconds: number): string {

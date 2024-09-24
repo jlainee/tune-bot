@@ -1,7 +1,12 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
-import { searchYoutube, formatDuration } from '../../utils/youtubeUtils';
+import {
+  searchYoutube,
+  formatDuration,
+  downloadFromYoutube,
+} from '../../utils/youtubeUtils';
+import logger from '../../utils/logger';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -21,41 +26,44 @@ module.exports = {
   async execute(interaction: ChatInputCommandInteraction) {
     const query = interaction.options.getString('query');
     if (query === null) {
-      await interaction.reply('Please prove a valid query.');
+      await interaction.reply('Please provide a valid query.');
       return;
     }
 
-    interaction
-      .deferReply()
-      .then(() => searchYoutube(query))
-      .then((data) => {
-        const user = interaction.user;
-        const songName = data.title.slice(0, 32).concat('..');
-        const duration = formatDuration(data.duration);
+    // Defer the reply as downloading might take some time
+    await interaction.deferReply();
 
-        const embed = new EmbedBuilder()
-          .setColor('#1df364')
-          .setTitle('Song added to Queue! 🎵')
-          .setDescription(`[${songName}](${data.url}) **[${duration}]**`)
-          .setTimestamp()
-          .setFooter({
-            iconURL: user.displayAvatarURL({ size: 64 }),
-            text: `${user.tag}`,
-          });
+    try {
+      const data = await searchYoutube(query);
+      const user = interaction.user;
+      const songName = data.title.slice(0, 32).concat('..');
+      const duration = formatDuration(data.duration);
 
-        interaction
-          .editReply({ embeds: [embed] })
-          .catch((error) => console.error('Error editing reply:', error));
-      })
-      .catch((error) => {
-        console.error(error);
-        const embed = new EmbedBuilder()
-          .setColor('#f93207')
-          .setDescription(`${error.message} :x:`);
+      const downloadPath = await downloadFromYoutube(data.url);
+      logger.info(`Download completed: ${downloadPath}`);
 
-        interaction
-          .editReply({ embeds: [embed] })
-          .catch((error) => console.error('Error editing reply:', error));
-      });
+      const embed = new EmbedBuilder()
+        .setColor('#1df364')
+        .setTitle('Song added to Queue! 🎵')
+        .setDescription(`[${songName}](${data.url}) **[${duration}]**`)
+        .addFields([
+          { name: 'Download', value: `Downloaded to: ${downloadPath}` },
+        ])
+        .setTimestamp()
+        .setFooter({
+          iconURL: user.displayAvatarURL({ size: 64 }),
+          text: `${user.tag}`,
+        });
+
+      await interaction.editReply({ embeds: [embed] });
+    } catch (error) {
+      console.error('Error:', error);
+
+      const errorEmbed = new EmbedBuilder()
+        .setColor('#f93207')
+        .setDescription(`${error.message} :x:`);
+
+      await interaction.editReply({ embeds: [errorEmbed] });
+    }
   },
 };
