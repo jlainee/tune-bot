@@ -1,8 +1,9 @@
 import { Client } from 'discord.js';
 import { registerCommands } from '../bot';
+import logger from '../utils/logger';
 
 export default function handleReady(client: Client) {
-  console.log(`Logged in as ${client.user?.tag}!`);
+  logger.info(`Logged in as ${client.user?.tag}!`);
 
   registerCommands(client);
 }

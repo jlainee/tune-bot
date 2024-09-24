@@ -1,8 +1,9 @@
 import { startBot } from './bot';
 import { checkConfig } from './config';
+import logger from './utils/logger';
 
 const main = async () => {
-  console.log('Starting bot..');
+  logger.info('Starting bot..');
   checkConfig();
   await startBot();
 };

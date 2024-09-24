@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import logger from './utils/logger';
 
 dotenv.config();
 
@@ -16,40 +17,40 @@ const resolvedDownloadDirectory =
 
 // Function to check and validate configuration
 export function checkConfig() {
-  console.log('Launching application with the following configuration:');
+  logger.debug('Launching application with the following configuration:');
 
   // Check for DISCORD_TOKEN
   if (!DISCORD_TOKEN) {
+    logger.error('Missing environment variable: DISCORD_TOKEN');
     throw new Error('Missing environment variable: DISCORD_TOKEN');
   }
-  console.log(`DISCORD_TOKEN: ${DISCORD_TOKEN ? 'Present' : 'Missing'}`);
 
   // Ensure download directory exists or create it
   try {
     if (!fs.existsSync(resolvedDownloadDirectory)) {
-      console.log(
+      logger.warn(
         `Directory ${resolvedDownloadDirectory} does not exist, creating...`,
       );
       fs.mkdirSync(resolvedDownloadDirectory, { recursive: true });
     } else {
-      console.log(`Directory ${resolvedDownloadDirectory} already exists.`);
+      logger.debug(`Directory: [${resolvedDownloadDirectory}] already exists.`);
     }
 
     // Check if the directory is writable
     fs.accessSync(resolvedDownloadDirectory, fs.constants.W_OK);
-    console.log(`Directory ${resolvedDownloadDirectory} is writable.`);
+    logger.debug(`Directory: [${resolvedDownloadDirectory}] is writable.`);
   } catch (error) {
-    console.error(
-      `Error with download directory ${resolvedDownloadDirectory}:`,
+    logger.error(
+      `Error with download directory [${resolvedDownloadDirectory}]:`,
       error,
     );
     throw new Error(
-      `Invalid DOWNLOADS_DIRECTORY: ${resolvedDownloadDirectory}`,
+      `Invalid DOWNLOADS_DIRECTORY: [${resolvedDownloadDirectory}]`,
     );
   }
 
-  console.log(`DOWNLOADS_DIRECTORY: ${resolvedDownloadDirectory}`);
-  console.log('Configuration check complete.');
+  logger.debug(`DOWNLOADS_DIRECTORY: [${resolvedDownloadDirectory}]`);
+  logger.debug('Configuration check complete.');
 }
 
 // Export the configuration object
