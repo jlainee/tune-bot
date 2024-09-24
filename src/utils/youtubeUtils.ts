@@ -19,7 +19,7 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
   }
 
   const data = JSON.parse(res.stdout);
-  if (!data || data.length === 0) {
+  if (!data.entries || data.entries.length === 0) {
     throw new Error('No results were found!');
   }
 
