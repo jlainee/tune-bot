@@ -39,6 +39,7 @@ module.exports = {
       const user = interaction.user;
       const songName = data.title.slice(0, 32).concat('..');
       const duration = formatDuration(data.duration);
+      const queue = 'N/A';
 
       const downloadPath = await downloadFromYoutube(data.url);
       logger.info(`Download completed: ${downloadPath}`);
@@ -46,7 +47,12 @@ module.exports = {
       const embed = new EmbedBuilder()
         .setColor('#1df364')
         .setTitle('Song added to Queue! 🎵')
-        .setDescription(`[${songName}](${data.url}) **[${duration}]**`)
+        .setThumbnail(data.thumbnail)
+        .setDescription(`[${songName}](${data.url})`)
+        .setFields([
+          { name: 'Duration:', value: `**${duration}**`, inline: true },
+          { name: 'Queue:', value: `**#${queue}**`, inline: true },
+        ])
         .setTimestamp()
         .setFooter({
           iconURL: user.displayAvatarURL({ size: 64 }),
