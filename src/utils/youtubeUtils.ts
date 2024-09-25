@@ -1,6 +1,5 @@
 import path from 'path';
 import { exec } from 'youtube-dl-exec';
-import { isURL } from './utils';
 import { config } from '../config';
 import logger from './logger';
 
@@ -35,16 +34,7 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
   };
 }
 
-export async function downloadFromYoutube(query: string): Promise<string> {
-  let url: string;
-
-  if (isURL(query)) {
-    url = query;
-  } else {
-    const youtubeQuery = await searchYoutube(query);
-    url = youtubeQuery.url;
-  }
-
+export async function downloadFromYoutube(url: string): Promise<string> {
   const outputPath = path.join(config.DOWNLOADS_DIRECTORY, '%(title)s.%(ext)s');
 
   try {

@@ -7,6 +7,7 @@ import {
   downloadFromYoutube,
 } from '../../utils/youtubeUtils';
 import logger from '../../utils/logger';
+import { isURL } from '../../utils/utils';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -46,9 +47,6 @@ module.exports = {
         .setColor('#1df364')
         .setTitle('Song added to Queue! 🎵')
         .setDescription(`[${songName}](${data.url}) **[${duration}]**`)
-        .addFields([
-          { name: 'Download', value: `Downloaded to: ${downloadPath}` },
-        ])
         .setTimestamp()
         .setFooter({
           iconURL: user.displayAvatarURL({ size: 64 }),
