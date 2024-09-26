@@ -15,8 +15,6 @@ import {
 } from 'discord.js';
 import { Command, commands } from './interfaces/Command';
 import handleReady from './events/ready';
-import handleSignals from './utils/signalHandler';
-import { downloadFromYoutube } from './utils/youtubeUtils';
 import { handleInteractionCreate } from './events/interactionCreate';
 
 export const startBot = async () => {
@@ -44,7 +42,6 @@ export const startBot = async () => {
 
   await client.login(config.DISCORD_TOKEN);
   await registerCommands(client);
-  handleSignals();
 };
 
 export const registerCommands = async (client: Client) => {

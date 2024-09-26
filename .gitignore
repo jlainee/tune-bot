@@ -1,5 +1,8 @@
 # TUNE-BOT
 downloads/
+test/
+*.sqlite
+*.sqlite3
 
 # NODE
 node_modules/

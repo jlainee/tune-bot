@@ -8,6 +8,7 @@ import {
 } from '../../utils/youtubeUtils';
 import logger from '../../utils/logger';
 import { isURL } from '../../utils/utils';
+import YoutubeTrack from '../../db/models/YoutubeTrack';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -37,18 +38,27 @@ module.exports = {
     try {
       const data = await searchYoutube(query);
       const user = interaction.user;
-      const songName = data.title.slice(0, 32).concat('..');
+      const title = data.title.slice(0, 32).concat('..');
       const duration = formatDuration(data.duration);
       const queue = 'N/A';
 
       const downloadPath = await downloadFromYoutube(data.url);
       logger.info(`Download completed: ${downloadPath}`);
 
+      const track = await YoutubeTrack.create({
+        title: data.title,
+        url: data.url,
+        thumbnail: data.thumbnail,
+        duration: data.duration,
+        filepath: downloadPath,
+      });
+      logger.debug(`Saved YouTube track: ${track.title}`);
+
       const embed = new EmbedBuilder()
         .setColor('#1df364')
         .setTitle('Song added to Queue! 🎵')
         .setThumbnail(data.thumbnail)
-        .setDescription(`[${songName}](${data.url})`)
+        .setDescription(`[${title}](${data.url})`)
         .setFields([
           { name: 'Duration:', value: `**${duration}**`, inline: true },
           { name: 'Queue:', value: `**#${queue}**`, inline: true },

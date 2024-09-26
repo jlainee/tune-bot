@@ -7,6 +7,7 @@ export interface YoutubeData {
   id: string;
   url: string;
   title: string;
+  channel: string;
   thumbnail: string;
   duration: number;
 }
@@ -29,13 +30,18 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
     id: data.entries[0].id,
     url: data.entries[0].webpage_url,
     title: data.entries[0].title,
+    channel: data.entries[0].channel,
     thumbnail: data.entries[0].thumbnail,
     duration: data.entries[0].duration,
   };
 }
 
 export async function downloadFromYoutube(url: string): Promise<string> {
-  const outputPath = path.join(config.DOWNLOADS_DIRECTORY, '%(title)s.%(ext)s');
+  const outputPath = path.join(
+    config.DOWNLOADS_DIRECTORY,
+    'youtube',
+    '%(title)s.%(ext)s',
+  );
 
   try {
     const result = await exec(url, {
