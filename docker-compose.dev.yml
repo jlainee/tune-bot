@@ -9,6 +9,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./downloads:/app/downloads
+      - ./database.sqlite:/app/database.sqlite
       - /app/node_modules
     env_file:
       - .env

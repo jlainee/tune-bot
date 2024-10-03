@@ -7,7 +7,6 @@ import {
   downloadFromYoutube,
 } from '../../utils/youtubeUtils';
 import logger from '../../utils/logger';
-import { isURL } from '../../utils/utils';
 import YoutubeTrack from '../../db/models/YoutubeTrack';
 
 module.exports = {
