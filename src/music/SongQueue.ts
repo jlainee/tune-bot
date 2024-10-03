@@ -8,8 +8,10 @@ export class SongQueue {
     return this.queue.length > 0 ? this.queue[this.currentSongIndex] : null;
   }
 
-  addSong(song: Song): void {
+  addSong(song: Song): number {
     this.queue.push(song);
+
+    return this.queue.length - 1;
   }
 
   skipSong(): void {

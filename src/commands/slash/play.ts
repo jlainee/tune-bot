@@ -8,6 +8,9 @@ import {
 } from '../../utils/youtubeUtils';
 import logger from '../../utils/logger';
 import YoutubeTrack from '../../db/models/YoutubeTrack';
+import songQueueInstance from '../../music/QueueManager';
+import { Song } from '../../interfaces/Song';
+import { createErrorEmbed, createSongEmbed } from '../../utils/embedHelper';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -35,48 +38,59 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const data = await searchYoutube(query);
       const user = interaction.user;
-      const title = data.title.slice(0, 32).concat('..');
-      const duration = formatDuration(data.duration);
-      const queue = 'N/A';
 
-      const downloadPath = await downloadFromYoutube(data.url);
-      logger.info(`Download completed: ${downloadPath}`);
-
-      const track = await YoutubeTrack.create({
-        title: data.title,
-        url: data.url,
-        thumbnail: data.thumbnail,
-        duration: data.duration,
-        filepath: downloadPath,
+      const existingTrack = await YoutubeTrack.findOne({
+        where: { url: query },
       });
-      logger.debug(`Saved YouTube track: ${track.title}`);
+      if (existingTrack) {
+        const song: Song = {
+          title: existingTrack.title,
+          duration: existingTrack.duration,
+          url: existingTrack.url,
+          thumbnail: existingTrack.thumbnail,
+          requestedBy: user.username,
+        };
+        logger.info(`Track exists! ${song.title}`);
+        const queuePosition = songQueueInstance.addSong(song);
 
-      const embed = new EmbedBuilder()
-        .setColor('#1df364')
-        .setTitle('Song added to Queue! 🎵')
-        .setThumbnail(data.thumbnail)
-        .setDescription(`[${title}](${data.url})`)
-        .setFields([
-          { name: 'Duration:', value: `**${duration}**`, inline: true },
-          { name: 'Queue:', value: `**#${queue}**`, inline: true },
-        ])
-        .setTimestamp()
-        .setFooter({
-          iconURL: user.displayAvatarURL({ size: 64 }),
-          text: `${user.tag}`,
+        const embed = createSongEmbed(song, user, queuePosition + 1);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      } else {
+        const data = await searchYoutube(query);
+
+        const downloadPath = await downloadFromYoutube(data.url);
+        logger.info(`Download completed: ${downloadPath}`);
+
+        const track = await YoutubeTrack.create({
+          title: data.title,
+          url: data.url,
+          thumbnail: data.thumbnail,
+          duration: data.duration,
+          filepath: downloadPath,
         });
+        logger.debug(`Saved YouTube track: ${track.title}`);
+
+        const song: Song = {
+          title: data.title,
+          duration: data.duration,
+          url: data.url,
+          thumbnail: data.thumbnail,
+          requestedBy: user.username,
+        };
+        const queuePosition = songQueueInstance.addSong(song);
+
+        const embed = createSongEmbed(song, user, queuePosition + 1);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+    } catch (error) {
+      logger.error('Error:', error);
+
+      const embed = createErrorEmbed(error.message);
 
       await interaction.editReply({ embeds: [embed] });
-    } catch (error) {
-      console.error('Error:', error);
-
-      const errorEmbed = new EmbedBuilder()
-        .setColor('#f93207')
-        .setDescription(`${error.message} :x:`);
-
-      await interaction.editReply({ embeds: [errorEmbed] });
     }
   },
 };

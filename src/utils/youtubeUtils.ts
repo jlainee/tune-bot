@@ -58,7 +58,7 @@ export async function downloadFromYoutube(url: string): Promise<string> {
     const videoInfo = JSON.parse(result.stdout);
     return videoInfo._filename;
   } catch (error) {
-    logger.error('Error downloading video:', error);
+    logger.error(`Error downloading video: ${error}`);
     throw new Error('Failed to download video.');
   }
 }
