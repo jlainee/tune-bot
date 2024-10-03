@@ -8,6 +8,9 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 \
+        ca-certificates \
+        ffmpeg \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
@@ -36,6 +39,14 @@ ENV NODE_ENV production
 USER ${USER}
 
 WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3 \
+        ca-certificates \
+        ffmpeg \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy built files from build stage
 COPY --chown=${USER}:${USER} --from=build /app/dist ./dist
