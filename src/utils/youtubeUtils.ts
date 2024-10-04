@@ -63,6 +63,13 @@ export async function downloadFromYoutube(url: string): Promise<string> {
   }
 }
 
+export const isYoutubeLink = (link: string) => {
+  const youtubePattern =
+    /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)(\/.+)?$/;
+
+  return youtubePattern.test(link);
+};
+
 export function formatDuration(seconds: number): string {
   if (seconds > 3600) {
     return new Date(seconds * 1000).toISOString().substring(11, 16);

@@ -3,7 +3,11 @@ import { config } from '../../config';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
-import { searchYoutube, downloadFromYoutube } from '../../utils/youtubeUtils';
+import {
+  searchYoutube,
+  downloadFromYoutube,
+  isYoutubeLink,
+} from '../../utils/youtubeUtils';
 import { createErrorEmbed, createSongEmbed } from '../../utils/embedHelper';
 import { Song } from '../../interfaces/Song';
 import logger from '../../utils/logger';
@@ -38,9 +42,21 @@ module.exports = {
 
     try {
       const user = interaction.user;
+      let url: string | null = null;
+
+      if (isYoutubeLink(query)) {
+        url = query;
+      } else {
+        const data = await searchYoutube(query);
+        if (data && data.url) {
+          url = data.url;
+        } else {
+          throw new Error('Could not find a Youtube video matching the query.');
+        }
+      }
 
       const existingTrack = await YoutubeTrack.findOne({
-        where: { url: query },
+        where: { url },
       });
       if (existingTrack) {
         const song: Song = {
@@ -59,7 +75,7 @@ module.exports = {
       } else {
         const data = await searchYoutube(query);
 
-        const fileName = await downloadFromYoutube(data.url);
+        const fileName = await downloadFromYoutube(query);
         logger.info(`Download completed: ${fileName}`);
 
         const filePath = path.join(config.YOUTUBE_PATH, fileName);
