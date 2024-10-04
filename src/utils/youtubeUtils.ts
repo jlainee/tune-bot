@@ -37,11 +37,7 @@ export async function searchYoutube(query: string): Promise<YoutubeData> {
 }
 
 export async function downloadFromYoutube(url: string): Promise<string> {
-  const outputPath = path.join(
-    config.DOWNLOADS_DIRECTORY,
-    'youtube',
-    '%(title)s.%(ext)s',
-  );
+  const outputPath = path.join(config.YOUTUBE_PATH, '%(title)s.%(ext)s');
 
   try {
     const result = await exec(url, {
