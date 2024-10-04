@@ -23,7 +23,43 @@ export const createSongEmbed = (song: Song, user: User, position: number) => {
   return embed;
 };
 
-export const createErrorEmbed = (message: Text) => {
+export const createSuccessEmbed = (
+  title: string,
+  description: string,
+  user: User,
+) => {
+  const embed = new EmbedBuilder()
+    .setColor('#1df364')
+    .setTitle(title)
+    .setDescription(description)
+    .setTimestamp()
+    .setFooter({
+      iconURL: user.displayAvatarURL({ size: 64 }),
+      text: `${user.tag}`,
+    });
+
+  return embed;
+};
+
+export const createWarnEmbed = (
+  title: string,
+  description: string,
+  user: User,
+) => {
+  const embed = new EmbedBuilder()
+    .setColor('#ffb001')
+    .setTitle(title)
+    .setDescription(description)
+    .setTimestamp()
+    .setFooter({
+      iconURL: user.displayAvatarURL({ size: 64 }),
+      text: `${user.tag}`,
+    });
+
+  return embed;
+};
+
+export const createErrorEmbed = (message: string) => {
   const embed = new EmbedBuilder()
     .setColor('#f93207')
     .setDescription(`${message} :x:`);
