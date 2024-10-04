@@ -56,7 +56,11 @@ export async function downloadFromYoutube(url: string): Promise<string> {
     });
 
     const videoInfo = JSON.parse(result.stdout);
-    return videoInfo._filename;
+
+    const videoName = path.basename(videoInfo._filename);
+    const audioName = videoName.replace(path.extname(videoName), '.mp3');
+
+    return audioName;
   } catch (error) {
     logger.error(`Error downloading video: ${error}`);
     throw new Error('Failed to download video.');

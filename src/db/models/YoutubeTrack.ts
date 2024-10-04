@@ -16,7 +16,7 @@ class YoutubeTrack extends Model<
   declare url: string;
   declare thumbnail: string;
   declare duration: number;
-  declare filepath: string;
+  declare filename: string;
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
@@ -44,7 +44,7 @@ YoutubeTrack.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    filepath: {
+    filename: {
       type: DataTypes.STRING,
       allowNull: false,
     },

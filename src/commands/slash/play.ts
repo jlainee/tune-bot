@@ -1,11 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
-import {
-  searchYoutube,
-  formatDuration,
-  downloadFromYoutube,
-} from '../../utils/youtubeUtils';
+import { searchYoutube, downloadFromYoutube } from '../../utils/youtubeUtils';
 import logger from '../../utils/logger';
 import YoutubeTrack from '../../db/models/YoutubeTrack';
 import songQueueInstance from '../../music/QueueManager';
@@ -60,15 +56,15 @@ module.exports = {
       } else {
         const data = await searchYoutube(query);
 
-        const downloadPath = await downloadFromYoutube(data.url);
-        logger.info(`Download completed: ${downloadPath}`);
+        const fileName = await downloadFromYoutube(data.url);
+        logger.info(`Download completed: ${fileName}`);
 
         const track = await YoutubeTrack.create({
           title: data.title,
           url: data.url,
           thumbnail: data.thumbnail,
           duration: data.duration,
-          filepath: downloadPath,
+          filename: fileName,
         });
         logger.debug(`Saved YouTube track: ${track.title}`);
 
