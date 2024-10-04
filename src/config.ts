@@ -9,6 +9,8 @@ const defaultDownloadDirectory = path.resolve(process.cwd(), 'downloads');
 const resolvedDownloadDirectory =
   process.env.DOWNLOADS_DIRECTORY || defaultDownloadDirectory;
 const databasePath = process.env.SQLITE_STORAGE_PATH || './database.sqlite';
+const youtubePath = path.join(defaultDownloadDirectory, 'youtube');
+const normalizationEnabled = process.env.NORMALIZATION_ENABLED === 'true';
 
 export function checkConfig() {
   logger.debug('Launching application with the following configuration:');
@@ -46,6 +48,8 @@ export function checkConfig() {
 
 export const config = {
   DATABASE_PATH: databasePath,
+  YOUTUBE_PATH: youtubePath,
   DISCORD_TOKEN: process.env.DISCORD_TOKEN,
   DOWNLOADS_DIRECTORY: resolvedDownloadDirectory,
+  NORMALIZATION_ENABLED: normalizationEnabled,
 };

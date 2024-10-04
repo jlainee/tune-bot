@@ -1,12 +1,15 @@
+import path from 'path';
+import { config } from '../../config';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
 import { searchYoutube, downloadFromYoutube } from '../../utils/youtubeUtils';
+import { createErrorEmbed, createSongEmbed } from '../../utils/embedHelper';
+import { Song } from '../../interfaces/Song';
 import logger from '../../utils/logger';
 import YoutubeTrack from '../../db/models/YoutubeTrack';
 import songQueueInstance from '../../music/QueueManager';
-import { Song } from '../../interfaces/Song';
-import { createErrorEmbed, createSongEmbed } from '../../utils/embedHelper';
+import { normalizeAudio } from '../../utils/ffmpegUtils';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -58,6 +61,9 @@ module.exports = {
 
         const fileName = await downloadFromYoutube(data.url);
         logger.info(`Download completed: ${fileName}`);
+
+        const filePath = path.join(config.YOUTUBE_PATH, fileName);
+        normalizeAudio(filePath);
 
         const track = await YoutubeTrack.create({
           title: data.title,
