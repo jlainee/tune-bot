@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 \
+        build-essential \
         ca-certificates \
         ffmpeg \
     && update-ca-certificates \
@@ -43,6 +44,7 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 \
+        build-essential \
         ca-certificates \
         ffmpeg \
     && update-ca-certificates \

@@ -1,18 +1,19 @@
 import path from 'path';
 import { config } from '../../config';
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, GuildMember } from 'discord.js';
 import { PermissionsBitField } from 'discord.js';
 import {
   searchYoutube,
   downloadFromYoutube,
   isYoutubeLink,
+  getYoutubeUrl,
 } from '../../utils/youtubeUtils';
 import { createErrorEmbed, createSongEmbed } from '../../utils/embedHelper';
 import { Song } from '../../interfaces/Song';
 import logger from '../../utils/logger';
 import YoutubeTrack from '../../db/models/YoutubeTrack';
-import songQueueInstance from '../../music/QueueManager';
+import { queueManager } from '../../music/QueueManager';
 import { normalizeAudio } from '../../utils/ffmpegUtils';
 
 module.exports = {
@@ -26,15 +27,12 @@ module.exports = {
         .setRequired(true),
     ),
   cooldown: 1,
-  permissions: [
-    PermissionsBitField.Flags.Connect,
-    PermissionsBitField.Flags.Speak,
-  ],
+  permissions: [PermissionsBitField.Flags.Connect, PermissionsBitField.Flags.Speak],
   async execute(interaction: ChatInputCommandInteraction) {
     const query = interaction.options.getString('query');
-    if (query === null) {
-      await interaction.reply('Please provide a valid query.');
-      return;
+
+    if (!query) {
+      return await interaction.reply('Please provide a valid query.');
     }
 
     // Defer the reply as downloading might take some time
@@ -42,22 +40,34 @@ module.exports = {
 
     try {
       const user = interaction.user;
-      let url: string | null = null;
+      const member = interaction.member as GuildMember;
 
-      if (isYoutubeLink(query)) {
-        url = query;
-      } else {
-        const data = await searchYoutube(query);
-        if (data && data.url) {
-          url = data.url;
-        } else {
-          throw new Error('Could not find a Youtube video matching the query.');
-        }
+      if (!member.voice.channel) {
+        return await interaction.reply('You need to be in a voice channel to play music.');
+      }
+
+      const voiceChannel = member.voice.channel;
+
+      // Check if the bot is already connected to a voice channel
+      if (
+        !queueManager.connection ||
+        queueManager.connection.joinConfig.channelId !== voiceChannel.id
+      ) {
+        // Connect to the voice channel
+        queueManager.connectToVoiceChannel(voiceChannel);
+      }
+      const { url, isPlaylist } = await getYoutubeUrl(query);
+
+      if (isPlaylist) {
+        return await interaction.reply(
+          'YouTube playlists are not supported at this time. Please provide a single video URL.',
+        );
       }
 
       const existingTrack = await YoutubeTrack.findOne({
         where: { url },
       });
+
       if (existingTrack) {
         const song: Song = {
           title: existingTrack.title,
@@ -67,7 +77,9 @@ module.exports = {
           requestedBy: user.username,
         };
         logger.info(`Track exists! ${song.title}`);
-        const queuePosition = songQueueInstance.addSong(song);
+        await queueManager.addSong(song);
+
+        const queuePosition = queueManager.getQueueSize();
 
         const embed = createSongEmbed(song, user, queuePosition + 1);
         await interaction.editReply({ embeds: [embed] });
@@ -97,7 +109,9 @@ module.exports = {
           thumbnail: data.thumbnail,
           requestedBy: user.username,
         };
-        const queuePosition = songQueueInstance.addSong(song);
+        queueManager.addSong(song);
+
+        const queuePosition = queueManager.getQueueSize();
 
         const embed = createSongEmbed(song, user, queuePosition + 1);
         await interaction.editReply({ embeds: [embed] });

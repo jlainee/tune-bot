@@ -8,6 +8,10 @@ export class SongQueue {
     return this.queue.length > 0 ? this.queue[this.currentSongIndex] : null;
   }
 
+  getNextSong(): Song | null {
+    return this.queue[0] || null;
+  }
+
   addSong(song: Song): number {
     this.queue.push(song);
 

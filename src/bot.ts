@@ -19,7 +19,11 @@ import { handleInteractionCreate } from './events/interactionCreate';
 
 export const startBot = async () => {
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.GuildVoiceStates,
+    ],
   });
 
   client.once(Events.ClientReady, (client) => {

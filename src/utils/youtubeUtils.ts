@@ -63,9 +63,34 @@ export async function downloadFromYoutube(url: string): Promise<string> {
   }
 }
 
-export const isYoutubeLink = (link: string) => {
+export const getYoutubeUrl = async (
+  query: string,
+): Promise<{ url: string; isPlaylist: boolean }> => {
+  if (isYoutubePlaylist(query)) {
+    return { url: query, isPlaylist: true };
+  }
+
+  if (isYoutubeLink(query)) {
+    return { url: query, isPlaylist: false };
+  }
+
+  const data = await searchYoutube(query);
+  if (!data || !data.url) {
+    throw new Error('Could not find a Youtube video matching the query');
+  }
+
+  return { url: data.url, isPlaylist: false };
+};
+
+export const isYoutubeLink = (link: string): boolean => {
+  const youtubePattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)(\/.+)?$/;
+
+  return youtubePattern.test(link);
+};
+
+export const isYoutubePlaylist = (link: string): boolean => {
   const youtubePattern =
-    /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)(\/.+)?$/;
+    /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:playlist\?list=|watch\?.*?&list=))(.*)/;
 
   return youtubePattern.test(link);
 };
