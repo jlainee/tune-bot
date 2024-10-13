@@ -4,15 +4,15 @@ import sequelize from './db/database';
 import logger from './utils/logger';
 import handleSignals from './utils/signalHandler';
 import { generateDependencyReport } from '@discordjs/voice';
-
-import YoutubeTrack from './db/models/YoutubeTrack';
+import { YoutubeTrack, SearchCache } from './db/models/index';
 
 const main = async () => {
   logger.info('Starting bot..');
   checkConfig();
   logger.debug(generateDependencyReport());
-  await sequelize.sync({ alter: true });
-  await YoutubeTrack.sync({ alter: true });
+  await sequelize.sync();
+  await YoutubeTrack.sync();
+  await SearchCache.sync();
   await startBot();
   handleSignals();
 };

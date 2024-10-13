@@ -1,43 +1,34 @@
-import {
-  CreationOptional,
-  DataTypes,
-  InferAttributes,
-  InferCreationAttributes,
-  Model,
-} from 'sequelize';
+// YoutubeTrack.ts
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../database';
+import SearchCache from './SearchCache';
 
-class YoutubeTrack extends Model<
-  InferAttributes<YoutubeTrack>,
-  InferCreationAttributes<YoutubeTrack>
-> {
-  declare id: CreationOptional<number>;
+class YoutubeTrack extends Model {
+  declare id: number;
   declare title: string;
   declare url: string;
   declare thumbnail: string;
   declare duration: number;
   declare filename: string;
-  declare createdAt: CreationOptional<Date>;
-  declare updatedAt: CreationOptional<Date>;
 }
 
 YoutubeTrack.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
     },
     title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     url: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     thumbnail: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
     duration: {
@@ -45,24 +36,13 @@ YoutubeTrack.init(
       allowNull: false,
     },
     filename: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
     },
   },
   {
     sequelize,
     tableName: 'youtube_tracks',
-    timestamps: true,
   },
 );
 
