@@ -9,7 +9,7 @@ export class SongQueue {
   }
 
   getNextSong(): Song | null {
-    return this.queue[0] || null;
+    return this.queue.shift() || null;
   }
 
   addSong(song: Song): number {
