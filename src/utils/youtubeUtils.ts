@@ -15,6 +15,7 @@ export interface YoutubeData {
 export async function searchYoutube(query: string): Promise<YoutubeData> {
   const res = await exec(`ytsearch1:${query}`, {
     dumpSingleJson: true,
+    skipDownload: true,
   });
 
   if (!res || !res.stdout) {
