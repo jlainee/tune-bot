@@ -54,7 +54,6 @@ module.exports = {
         !queueManager.connection ||
         queueManager.connection.joinConfig.channelId !== voiceChannel.id
       ) {
-        // Connect to the voice channel
         queueManager.connectToVoiceChannel(voiceChannel);
       }
       const { url, isPlaylist } = await getYoutubeUrl(query);
@@ -85,11 +84,10 @@ module.exports = {
 
         const embed = createSongEmbed(song, user, queuePosition + 1);
         await interaction.editReply({ embeds: [embed] });
-        return;
       } else {
         const data = await searchYoutube(query);
 
-        const fileName = await downloadFromYoutube(query);
+        const fileName = await downloadFromYoutube(data.url);
         logger.info(`Download completed: ${fileName}`);
 
         const filePath = path.join(config.YOUTUBE_PATH, fileName);
@@ -111,13 +109,12 @@ module.exports = {
           thumbnail: data.thumbnail,
           requestedBy: user.username,
         };
-        queueManager.addSong(song);
+        await queueManager.addSong(song);
 
         const queuePosition = queueManager.getQueueSize();
 
         const embed = createSongEmbed(song, user, queuePosition);
         await interaction.editReply({ embeds: [embed] });
-        return;
       }
     } catch (error) {
       logger.error('Error:', error);
