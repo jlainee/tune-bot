@@ -43,7 +43,8 @@ module.exports = {
       const member = interaction.member as GuildMember;
 
       if (!member.voice.channel) {
-        return await interaction.reply('You need to be in a voice channel to play music.');
+        const embed = createErrorEmbed('You need to be in a voice channel to play music.');
+        return await interaction.editReply({ embeds: [embed] });
       }
 
       const voiceChannel = member.voice.channel;
@@ -59,9 +60,10 @@ module.exports = {
       const { url, isPlaylist } = await getYoutubeUrl(query);
 
       if (isPlaylist) {
-        return await interaction.reply(
+        const embed = createErrorEmbed(
           'YouTube playlists are not supported at this time. Please provide a single video URL.',
         );
+        return await interaction.editReply({ embeds: [embed] });
       }
 
       const existingTrack = await YoutubeTrack.findOne({
@@ -113,7 +115,7 @@ module.exports = {
 
         const queuePosition = queueManager.getQueueSize();
 
-        const embed = createSongEmbed(song, user, queuePosition + 1);
+        const embed = createSongEmbed(song, user, queuePosition);
         await interaction.editReply({ embeds: [embed] });
         return;
       }
